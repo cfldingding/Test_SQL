@@ -7,6 +7,7 @@
 #include "sort.h"
 #include "Windows.h"
 #include "MyString.h"
+#include "common.h"
 
 using namespace std;
 //#include "DbgHelp.h"
@@ -137,15 +138,213 @@ static LONG WINAPI pfnUnhandledExceptionFilter(PEXCEPTION_POINTERS pExceptionInf
 #define CRTDBG_MAP_ALLOC 
 #include <crtdbg.h>  
 #include "Composite.h"
+#include <list>
+#include <vector>
+using namespace std;
+
+//渣渣版
+NodeL* addTwoNumbers(NodeL* l1, NodeL* l2) {
+	list<int> num;
+	vector<int> num1, num2;
+	int big = 0, i1 = 0, i2 = 0;
+	for (l1; nullptr != l1; l1 = l1->next)
+	{
+		num1.push_back(l1->value);
+		i1++;
+	}
+
+	for (l2; nullptr != l2; l2 = l2->next)
+	{
+		num2.push_back(l2->value);
+		i2++;
+	}
+
+
+	//计算到list中
+	big = max(i1,i2);
+	int x1 = 0, x2 = 0, total = 0,next = 0;
+	for (int i = 0;i < big;++i)
+	{
+		x1 = 0, x2 = 0, total = 0;
+		if (i < i1) //第一个列表
+		{
+			x1 = num1[i];
+		}
+		if (i < i2)
+		{
+			x2 = num2[i];
+		}
+		total = x1 + x2 + next;
+		next = 0;
+		if (total/10 > 0)
+		{
+			total %= 10;
+			next = 1;
+		}
+		num.push_front(total);
+	}
+	if (1== next)
+	{
+		num.push_front(next);
+	}
+
+
+	NodeL* ret = nullptr;
+	NodeL* head = nullptr;
+	list<int>::iterator itor;
+	for (itor = num.begin();itor != num.end();++itor)
+	{
+		if ( nullptr == head)
+		{
+			ret = new NodeL(*itor);
+			head = ret ;
+		}
+		else
+		{
+			ret->next = new NodeL(*itor);
+			ret = ret->next;
+		}
+
+	}
+
+	return head;
+}
+
+//NB 版
+NodeL* addTwoNumbers_(NodeL* l1, NodeL* l2) {
+	int carry = 0;
+	int sum = 0;
+	NodeL* newhead = new NodeL(0, nullptr);
+	NodeL* nownode = newhead;
+	while (l1 || l2 || carry)
+	{
+		sum = (l1 ? l1->value : 0) + (l2 ? l2->value : 0) + carry;
+		carry = sum / 10;
+		NodeL* node = new NodeL(sum % 10, nullptr);
+		nownode->next = node;
+		nownode = nownode->next;
+
+		l1 = l1 ? l1->next : l1;
+		l2 = l2 ? l2->next : l2;
+	}
+
+	return newhead->next;
+}
+
+NodeL* deleteDuplicates_(NodeL* head)
+{
+	if (nullptr == head || nullptr == head->next)
+		return head;
+	NodeL* v_slow = head;
+	NodeL* v_fast = head->next;
+	while (v_fast)
+	{
+		if (v_slow->value < v_fast->value)
+		{
+			v_slow = v_slow->next;
+			v_slow->value = v_fast->value;
+		}
+		v_fast = v_fast->next;
+	}
+	if (nullptr != v_slow->next)
+	{
+		v_fast = v_slow->next; //截断
+		v_slow->next = nullptr;
+
+
+		while (nullptr != v_fast)
+		{
+			v_slow = v_fast;
+			v_fast = v_fast->next;
+			delete v_slow;
+			v_slow = nullptr;
+		}
+
+	}
+	return head;
+}
+//反转链表
+NodeL* reverseList(NodeL* head)
+{
+	if (nullptr == head || nullptr == head->next)
+		return head;
+	NodeL* p = head, * q = head->next,*t = nullptr;
+	//p->next = nullptr;
+	while (nullptr != q)
+	{
+		t = q->next;
+		q->next = p;
+		p = q;
+		q = t;
+	}
+	head->next = nullptr;
+	return p;
+}
+#include <set>
+bool isHappy(int n)
+{
+	long long xx = n;
+	set<int> v_set;
+	while (1 != xx)
+	{
+		int temp = xx,num = 0;
+		xx = 0;
+		while (temp > 0)
+		{
+			num = temp%10;
+			xx += (num * num);
+			temp /= 10;
+			if (xx > 0x7fffffff)
+			{
+				return false;
+			}
+		}
+		if (v_set.find(xx) != v_set.end() || v_set.size() > 100000)
+			return false;
+		v_set.insert(xx);
+
+	}
+	return true;
+}
+
+bool containsDuplicate(vector<int>& nums) 
+{
+	set<int> v_set;
+	for (int i:nums)
+	{
+		if (v_set.find(i) != v_set.end())
+			return true;
+		v_set.insert(i);
+	}
+	return false;
+}
+
+class AB
+{
+public:
+	int* m_p;
+	int m_num;
+
+	AB(int *p,int num)
+	{
+		m_p = nullptr;
+		m_num = 0;
+	}
+	~AB()
+	{
+
+	}
+};
+
 int main()
 {
 	
     SetUnhandledExceptionFilter(pfnUnhandledExceptionFilter);
    // SetUnhandledExceptionFilter(ExceptionFilter);
-    int arr[5] = {3,5,78,89,9};
-   // BubbleSort(arr,5);
-	QuickSort(arr,0,4);
-    int x = 8;
+ //   int arr[5] = {3,5,78,89,9};
+ //  // BubbleSort(arr,5);
+	//QuickSort(arr,0,4);
+ //   int x = 8;
 	////int* pInt = new int[10];
 	//_CrtDumpMemoryLeaks();
 	//system("pause");
@@ -164,7 +363,34 @@ int main()
 	composite2->add(composite1);
 
 	composite2->operation();*/
-	
-	int te = 0;
+	NodeL* l1 = new NodeL(9);
+	/*l1->next = new NodeL(4);
+	l1->next->next = new NodeL(3);*/
+	//l1->next->next->next = new NodeL(0);
+
+	NodeL* l2 = new NodeL(1);
+	l2->next = new NodeL(1);
+	l2->next->next = new NodeL(2);
+	l2->next->next->next = new NodeL(9);
+	l2->next->next->next->next = new NodeL(9);
+	//l2->next->next->next->next->next = new NodeL(9);
+	//l2->next->next->next->next->next->next = new NodeL(9);
+	//l2->next->next->next->next->next->next->next = new NodeL(9);
+	//l2->next->next->next->next->next->next->next->next = new NodeL(9);
+	//l2->next->next->next->next->next->next->next->next->next = new NodeL(9);
+	//l2->next->next->next = new NodeL(0);
+	//NodeL* xx = reverseList(l2);
+	//addTwoNumbers_(l1,l2);
+	bool tx = isHappy(77);
+	cout << tx << endl;
+	int&& te = 10;
+	te = 0;
+	cout << te << endl;
+	int xx = te;
+	string str("dddd");
+	//cout << str << endl;
+	string str1 = std::move(str);
+	string str2 = std::forward<string>(str1);
+	//cout << str1 << " "<< te << endl;
 }
 
